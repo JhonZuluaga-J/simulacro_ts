@@ -1,55 +1,54 @@
 
 import { ENV } from "@/lib/config/envValidator";
-
+ 
 export enum LogLevel {
-    DEBUG = 0,
-    INFO = 1,
-    WARN = 2,
-    ERROR = 3,
+  DEBUG = 0,
+  INFO = 1,
+  WARN = 2,
+  ERROR = 3,
 }
 
-
-interface logEntry {
-    level: LogLevel;
-    message: string;
-    timestamp: string;
-    context?: Record<string, unknown>;
+interface LogEntry {
+  level: LogLevel;
+  message: string;
+  timestamp: string;
+  context?: Record<string, unknown>;
 }
+
+const LOG_LEVEL_MAP: Record<string, LogLevel> = {
+    DEBUG: LogLevel.DEBUG,
+    INFO: LogLevel.INFO,
+    WARN: LogLevel.WARN,
+    ERROR: LogLevel.ERROR,
+}
+
+const CONSOLE_METHOD: Record<LogLevel, (msg: string) => void> = {
+    [LogLevel.DEBUG]: console.log,
+    [LogLevel.INFO]: console.log,
+    [LogLevel.WARN]: console.warn,
+    [LogLevel.ERROR]: console.error,
+}
+
+const formatTimestamp = (iso: string): string =>
+    iso.replace("T", " ").replace("Z", "");
+
+const formatContext = (context?: Record <string, unknown>): string => 
+    context ? ` ${JSON.stringify(context)}` : '';
+
+const formatEntry = (entry: LogEntry): string => 
+    `[${formatTimestamp(entry.timestamp)}] ${LogLevel[entry.level]}: ${entry.message}${formatContext(entry.context)}`;
 
 
 class Logger {
     private static instance: Logger;
-    private logLevel: LogLevel;
+    private readonly logLevel: LogLevel;
 
-    constructor() {
-        this.logLevel = this.getLogLevel();
-    }
-
-    private getLogLevel(): LogLevel {
-        const envLevel = ENV.LOG_LEVEL;
-        switch (envLevel) {
-            case "DEBUG":
-                return LogLevel.DEBUG;
-            case "INFO":
-                return LogLevel.INFO;
-            case "WARN":
-                return LogLevel.WARN;
-            case "ERROR":
-                return LogLevel.ERROR;
-            default:
-                return LogLevel.INFO;
-        }
+    private constructor()  {
+        this.logLevel = LOG_LEVEL_MAP[ENV.LOG_LEVEL] ?? LogLevel.INFO;
     }
 
     private shouldLog(level : LogLevel) : boolean {
         return level >= this.logLevel;
-    }
-       
-    private formatMessage(entry: logEntry): string {
-        // todo lo que se ingreza pasa a formato de json string 
-        const contextStr = entry.context ? `${JSON.stringify(entry.context)}` : '';
-        const timestamp = `${entry.timestamp.replace("T", " ").replace("Z", "")}`; // tiempo en formato legible y global
-        return `[${timestamp}] ${LogLevel[entry.level]}: ${entry.message}${contextStr}`;
     }
 
     private writeLog(
@@ -59,23 +58,17 @@ class Logger {
     ):void {
         if (!this.shouldLog(level)) return;
 
-        const entry: logEntry = {
+        const entry: LogEntry = {
             level,
             message,
             timestamp: new Date().toISOString(),
             context,
         };
 
-        const formatted = this.formatMessage(entry);
+        const formatted = formatEntry(entry);
 
-        const loggers: Record<LogLevel, (msg: string) => void> = {
-            [LogLevel.DEBUG]: console.log,
-            [LogLevel.INFO]: console.log,
-            [LogLevel.WARN]: console.warn,
-            [LogLevel.ERROR]: console.error,
-        };
 
-        loggers[level]?.(formatted);
+        CONSOLE_METHOD[level](formatted);
     }
 
 

@@ -19,7 +19,10 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/AppError": ["./src/lib/AppError.ts"],
+      "@/errors/index": ["./src/lib/errors/index.ts"],
+      "@/types/services": ["./src/types/services.ts"]
     }
   },
   "include": [
