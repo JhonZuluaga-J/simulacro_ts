@@ -1,4 +1,4 @@
-import type { JwtPayload } from "@/services/jwt/jwtService";
+import type { JwtPayload } from "@/services/jwt/jwtServices";
 
 /**
  * Hashing service (abstraction)

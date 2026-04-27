@@ -1,4 +1,4 @@
-import { NotFoundError, ValidationError, toErrorMessage } from "@/errors/index";
+import { NotFoundError, ValidationError, toErrorMessage } from "@/lib/errors";
 import { logger } from "@/lib/logger";
 
 type PrismaErrorCode = "P2025" | "P2002";

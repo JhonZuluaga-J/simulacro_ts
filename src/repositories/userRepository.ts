@@ -1,5 +1,15 @@
 import { prisma } from "@/lib/prisma";
-import { users as PrismaUser } from "@prisma/client";
+type PrismaUser = {
+  id: string;
+  email: string;
+  name: string;
+  password: string | null;
+  role: string;
+  locationName: string | null;
+  position: string | null;
+  created_at: Date;
+  updated_at: Date;
+};
 import { bcryptPasswordService } from "@/services/bcryptService";
 import { handleNotFoundError, handleDuplicateError } from "@/lib/prismaErros/userErrorHandler";
 import { logger } from "@/lib/logger";
@@ -53,10 +63,10 @@ export async function create(data: CreateUserInput): Promise<SafeUser> {
       },
     }),
     data.email,
-  ) as PrismaUser;
+  ) as unknown;
 
-  logger.info("User created", { userId: newUser.id, email: newUser.email, role: newUser.role });
-  return mapToSafeUser(newUser);
+  logger.info("User created", { userId: (newUser as PrismaUser).id, email: (newUser as PrismaUser).email, role: (newUser as PrismaUser).role });
+  return mapToSafeUser(newUser as PrismaUser);
 }
 
 export async function update(id: string, data: UpdateUserInput): Promise<SafeUser> {
@@ -75,18 +85,18 @@ export async function update(id: string, data: UpdateUserInput): Promise<SafeUse
       },
     }),
     id,
-  );
+  ) as unknown;
 
   logger.info("User updated", { userId: id, updatedFields: Object.keys(data) });
-  return mapToSafeUser(updatedUser);
+  return mapToSafeUser(updatedUser as PrismaUser);
 }
 
 export async function deleteById(id: string): Promise<SafeUser> {
   const deletedUser = await handleNotFoundError(
     prisma.users.delete({ where: { id } }),
     id,
-  ) as PrismaUser;
+  ) as unknown;
 
-  logger.info("User deleted", { userId: deletedUser.id, email: deletedUser.email });
-  return mapToSafeUser(deletedUser);
+  logger.info("User deleted", { userId: (deletedUser as PrismaUser).id, email: (deletedUser as PrismaUser).email });
+  return mapToSafeUser(deletedUser as PrismaUser);
 }

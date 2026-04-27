@@ -7,7 +7,7 @@ import {
   JWTInvalidError,
   JWTPayloadInvalidError,
   JWTGenerationError,
-} from "@/errors/index";
+} from "@/lib/errors";
 
 type JoseErrorCode = "ERR_JWT_EXPIRED" | "ERR_JWT_INVALID";
 
