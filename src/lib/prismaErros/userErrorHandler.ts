@@ -36,7 +36,7 @@ const PRISMA_ERROR_HANDLERS: Record<PrismaErrorCode, (context: string) => never>
 async function handlePrismaError<T>(
   promise: Promise<T>,
   context: string,
-  code: PrismaErrorCode
+  code: PrismaErrorCode,
 ): Promise<T> {
   try {
     return await promise;
@@ -46,10 +46,14 @@ async function handlePrismaError<T>(
     }
     handleUnknown(err);
   }
+  // Este código nunca se ejecuta, pero ayuda a TypeScript a inferir el tipo
+  throw new Error("Unreachable");
 }
 
-export const handleNotFoundError = <T>(promise: Promise<T>, identifier: string): Promise<T> =>
-  handlePrismaError(promise, identifier, "P2025");
+export async function handleNotFoundError<T>(promise: Promise<T>, identifier: string): Promise<T> {
+  return handlePrismaError(promise, identifier, "P2025");
+}
 
-export const handleDuplicateError = <T>(promise: Promise<T>, email: string): Promise<T> =>
-  handlePrismaError(promise, email, "P2002");
+export async function handleDuplicateError<T>(promise: Promise<T>, email: string): Promise<T> {
+  return handlePrismaError(promise, email, "P2002");
+}
